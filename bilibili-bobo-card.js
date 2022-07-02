@@ -3,7 +3,7 @@
 // @namespace    https://github.com/milkiq/bilibili-bobo-card
 // @supportURL   https://github.com/milkiq/bilibili-bobo-card/issues
 // @match        https://*.bilibili.com/*
-// @version      1.0.1
+// @version      1.1
 // @author       milkiq
 // @grant        unsafeWindow
 // @grant        GM_getValue
