@@ -38,12 +38,16 @@
     if (uid === 33605910) return true;
     return allUids.some(id => id === uid);
   }
+  
+  function getFansNumber(uid) {
+    return uid === 33605910 ? 1 : (uid + '').slice(-6);
+  }
 
   function injectDynamicItem(item) {
     const uid = item?.modules?.module_author?.mid;
     if (!uidMatch(uid)) return;
 
-    const number = uid === 33605910 ? 1 : (uid + '').slice(-6);
+    const number = getFansNumber(uid);
     item.modules.module_author.decorate = {
         "card_url": "https://i0.hdslb.com/bfs/new_dyn/a3c6601ddcf82030e4e3bd3ebf148e411320060365.png",
         "fan": {
@@ -200,7 +204,7 @@
       const memberData = replies[i]?.member;
       if (!memberData) continue;
       if (uidMatch(+memberData.mid)){
-        const number = memberData.mid.slice(-6);
+        const number = getFansNumber(+memberData.mid);
         memberData.user_sailing.cardbg = {
             "id": 33521,
             "name": "三三与她的小桂物",
@@ -208,10 +212,10 @@
             "jump_url": "https://space.bilibili.com/33605910",
             "fan": {
                 "is_fan": 1,
-                "number": +number,
+                "number": number,
                 "color": "#ff7373",
                 "name": "三三与她的小桂物",
-                "num_desc": number
+                "num_desc": number + ''
             },
             "type": "suit"
         }
