@@ -66,7 +66,7 @@
         if (request.url.includes('timezone_offset')) {
           // 动态详情页
           let response_json = JSON.parse(response.text);
-          injectDynamicItem(response_json.data.item);
+          injectDynamicItem(response_json?.data?.item);
           response.text = JSON.stringify(response_json);
         }
       } else if (
@@ -194,47 +194,51 @@
     console.log('啵啵动态卡片插件加载完成');
   });
   
-  
+  function modifyUserSailing(replies) {
+    replies = replies ?? [];
+    for (let i = 0; i < replies.length; i++) {
+      const memberData = replies[i]?.member;
+      if (!memberData) continue;
+      if (uidMatch(+memberData.mid)){
+        const number = memberData.mid.slice(-6);
+        memberData.user_sailing.cardbg = {
+            "id": 33521,
+            "name": "三三与她的小桂物",
+            "image": "https://i0.hdslb.com/bfs/new_dyn/223325d6ff3c467a762eacd8cebad5bd1320060365.png",
+            "jump_url": "https://space.bilibili.com/33605910",
+            "fan": {
+                "is_fan": 1,
+                "number": +number,
+                "color": "#ff7373",
+                "name": "三三与她的小桂物",
+                "num_desc": number
+            },
+            "type": "suit"
+        }
+      }
+    }
+  }
 
-    // 添加jsonp钩子，评论数据使用jsonp方式获取，修改jquery的函数进行代理
-    // jquery jsonp 原理见 https://www.cnblogs.com/aaronjs/p/3785646.html
-    const jsonpMutation = new MutationObserver((mutationList, observer) => {
-      for (const mutation of mutationList) {
-        if (mutation.type === 'childList') {
-          if (mutation.addedNodes.length > 0) {
-            for (const node of mutation.addedNodes) {
-              if (node.localName === 'script' && node.src.includes('//api.bilibili.com/x/v2/reply/main')) {
-                const callbackName = node.src.match(/callback=(.*?)&/)[1];
-                const originFunc = unsafeWindow[callbackName];
-                unsafeWindow[callbackName] = (value) => {
-                  for (let i = 0; i < value.data.replies.length; i++) {
-                    const memberData = value.data.replies[i].member;
-                    if (uidMatch(+memberData.mid)){
-                      const number = memberData.mid.slice(-6);
-                      memberData.user_sailing.cardbg = {
-                          "id": 33521,
-                          "name": "三三与她的小桂物",
-                          "image": "https://i0.hdslb.com/bfs/new_dyn/223325d6ff3c467a762eacd8cebad5bd1320060365.png",
-                          "jump_url": "https://space.bilibili.com/33605910",
-                          "fan": {
-                              "is_fan": 1,
-                              "number": +number,
-                              "color": "#ff7373",
-                              "name": "三三与她的小桂物",
-                              "num_desc": number
-                          },
-                          "type": "suit"
-                      }
-                    }
-                  }
-
-                  originFunc(value);
-                }
+  // 添加jsonp钩子，评论数据使用jsonp方式获取，修改jquery的函数进行代理
+  // jquery jsonp 原理见 https://www.cnblogs.com/aaronjs/p/3785646.html
+  const jsonpMutation = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+      if (mutation.type === 'childList') {
+        if (mutation.addedNodes.length > 0) {
+          for (const node of mutation.addedNodes) {
+            if (node.localName === 'script' && node.src.includes('//api.bilibili.com/x/v2/reply/main')) {
+              const callbackName = node.src.match(/callback=(.*?)&/)[1];
+              const originFunc = unsafeWindow[callbackName];
+              unsafeWindow[callbackName] = (value) => {
+                modifyUserSailing(value.data.replies);
+                modifyUserSailing([value.data.top?.upper]);
+                originFunc(value);
               }
             }
           }
         }
       }
-    });
-    jsonpMutation.observe(unsafeWindow.document.head, { childList: true, subtree: true });
+    }
+  });
+  jsonpMutation.observe(unsafeWindow.document.head, { childList: true, subtree: true });
 })();
