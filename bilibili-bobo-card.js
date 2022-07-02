@@ -191,6 +191,11 @@
       });
     }
 
+    console.log('啵啵动态卡片插件加载完成');
+  });
+  
+  
+
     // 添加jsonp钩子，评论数据使用jsonp方式获取，修改jquery的函数进行代理
     // jquery jsonp 原理见 https://www.cnblogs.com/aaronjs/p/3785646.html
     const jsonpMutation = new MutationObserver((mutationList, observer) => {
@@ -202,7 +207,7 @@
                 const callbackName = node.src.match(/callback=(.*?)&/)[1];
                 const originFunc = unsafeWindow[callbackName];
                 unsafeWindow[callbackName] = (value) => {
-                  for (let i in value.data.replies) {
+                  for (let i = 0; i < value.data.replies.length; i++) {
                     const memberData = value.data.replies[i].member;
                     if (uidMatch(+memberData.mid)){
                       const number = memberData.mid.slice(-6);
@@ -232,7 +237,4 @@
       }
     });
     jsonpMutation.observe(unsafeWindow.document.head, { childList: true, subtree: true });
-
-    console.log('啵啵动态卡片插件加载完成');
-  });
 })();
