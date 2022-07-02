@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Bilibili 啵啵动态卡片 - bilibili.com
-// @namespace    https://github.com/milkiq
+// @namespace    https://github.com/milkiq/bilibili-bobo-card
+// @supportURL   https://github.com/milkiq/bilibili-bobo-card/issues
 // @match        https://*.bilibili.com/*
 // @version      1.0
-// @author       aqqqq
+// @author       milkiq
 // @grant        unsafeWindow
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -12,8 +13,7 @@
 
 (function () {
   'use strict';
-  console.log(unsafeWindow.xhook, xhook, '?????');
-  const allUids = GM_getValue('bobo_liker_uids');
+  const allUids = GM_getValue('bobo_liker_uids') ?? [];
 
 
   function uidMatch(uid) {
@@ -179,4 +179,47 @@
       createWrapper(settingBtnEl);
     });
   }
+  
+  const jsonpMutation = new MutationObserver((mutationList, observer) => {
+    for (const mutation of mutationList) {
+      if (mutation.type === 'childList') {
+        if (mutation.addedNodes.length > 0) {
+          for (const node of mutation.addedNodes) {
+            if (node.localName === 'script' && node.src.includes('//api.bilibili.com/x/v2/reply/main')) {
+              const callbackName = node.src.match(/callback=(.*?)&/)[1];
+              const originFunc = unsafeWindow[callbackName];
+              unsafeWindow[callbackName] = (value) => {
+                console.log(value, '<<<<<<<', 'hacked');
+                for (let i in value.data.replies) {
+                  const memberData = value.data.replies[i].member;
+                  if (uidMatch(+memberData.mid)){
+                    const number = memberData.mid.slice(-6);
+                    memberData.user_sailing.cardbg = {
+                        "id": 33521,
+                        "name": "三三与她的小桂物",
+                        "image": "https://i0.hdslb.com/bfs/new_dyn/223325d6ff3c467a762eacd8cebad5bd1320060365.png",
+                        "jump_url": "https://space.bilibili.com/33605910",
+                        "fan": {
+                            "is_fan": 1,
+                            "number": +number,
+                            "color": "#ff7373",
+                            "name": "三三与她的小桂物",
+                            "num_desc": number
+                        },
+                        "type": "suit"
+                    }
+                  }
+                }
+                
+                originFunc(value);
+              }
+            }
+          }
+        }
+        console.log(mutation);
+      }
+    }
+  });
+  
+  jsonpMutation.observe(unsafeWindow.document.head, { childList: true, subtree: true });
 })();
