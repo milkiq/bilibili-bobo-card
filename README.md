@@ -1,3 +1,5 @@
+# [已迁移合并到啵啵表情包插件](https://github.com/AS042971/bilibili-bobo)
+
 # bilibili-bobo-card
 哔哩哔哩网站啵啵动态装扮插件
 
